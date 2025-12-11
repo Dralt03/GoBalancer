@@ -1,3 +1,3 @@
-module loadbalancer
+module LoadBalancer
 
 go 1.21
