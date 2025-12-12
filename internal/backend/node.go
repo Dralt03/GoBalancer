@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -8,6 +9,7 @@ import (
 type Backend struct {
 	Address string
 	Weight  int
+	mu      sync.RWMutex
 
 	alive               int32 // 1=UP 0=DOWN
 	connCount           int64
@@ -36,6 +38,8 @@ func (b *Backend) MarkAlive() {
 	atomic.StoreInt32(&b.alive, 1)
 	atomic.StoreInt32(&b.consecutiveFailures, 0)
 	atomic.AddInt32(&b.consecutiveSuccess, 1)
+	b.mu.Lock()
+	defer b.mu.Unlock()
 	b.lastSuccess = time.Now()
 }
 
@@ -43,6 +47,8 @@ func (b *Backend) MarkDead() {
 	atomic.StoreInt32(&b.alive, 0)
 	atomic.StoreInt32(&b.consecutiveSuccess, 0)
 	atomic.AddInt32(&b.consecutiveFailures, 1)
+	b.mu.Lock()
+	defer b.mu.Unlock()
 	b.lastFailed = time.Now()
 }
 
@@ -59,10 +65,14 @@ func (b *Backend) ConnCount() int64 {
 }
 
 func (b *Backend) GetLastSuccess() time.Time {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
 	return b.lastSuccess
 }
 
 func (b *Backend) GetLastFailed() time.Time {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
 	return b.lastFailed
 }
 
