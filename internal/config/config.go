@@ -15,7 +15,7 @@ type Config struct {
 	ListenAddress string       `yaml:"listen_address" json:"listen_address" toml:"listen_address"`
 	UseIOUring    bool         `yaml:"use_iouring" json:"use_iouring" toml:"use_iouring"`
 	Algorithm     string       `yaml:"algorithm" json:"algorithm" toml:"algorithm"`
-	Backend       []BackendCfg `yaml:"backends" json:"backends" toml:"backends"`
+	Backends       []BackendCfg `yaml:"backends" json:"backends" toml:"backends"`
 	HealthCheck   HealthCfg    `yaml:"health_check" json:"health_check" toml:"health_check"`
 	Timeout       TimeoutCfg   `yaml:"timeout" json:"timeout" toml:"timeout"`
 }
@@ -78,7 +78,7 @@ func (c *Config) validate() error {
 		return errors.New("listen Address is empty")
 	}
 
-	if len(c.Backend) == 0 {
+	if len(c.Backends) == 0 {
 		return errors.New("no Backends are specified")
 	}
 
