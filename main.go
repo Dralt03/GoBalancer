@@ -17,7 +17,7 @@ import (
 func main() {
 	//Load configuration file
 	cfg, err := config.Load("config.yaml")
-	if err != nil{
+	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
@@ -55,15 +55,14 @@ func main() {
 		log.Fatalf("Failed to create proxy: %v", err)
 	}
 
-	go func(){
+	go func() {
 		if err := pxy.Start(); err != nil {
 			log.Fatalf("Failed to start proxy: %v", err)
 		}
 	}()
 
-	
 	//Graceful Shutdown
-	sigC := make(chan os.Signal, 1)
+	sigC := make(chan os.Signal, 1) //Buffered channel to avoid missing signals
 	signal.Notify(sigC, syscall.SIGINT, syscall.SIGTERM)
 
 	<-sigC
