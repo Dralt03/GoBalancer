@@ -8,7 +8,7 @@ import (
 
 type Backend struct {
 	Address string
-	Weight  int
+	weight  int64
 	mu      sync.RWMutex
 
 	alive               int32 // 1=UP 0=DOWN
@@ -19,15 +19,23 @@ type Backend struct {
 	lastSuccess         time.Time
 }
 
-func NewBackend(address string, weight int) *Backend {
+func NewBackend(address string, weight int64) *Backend {
 	b := &Backend{
 		Address: address,
-		Weight:  weight,
+		weight:  weight,
 	}
 
 	// Backend is considered healthy by default until marked by health checker
 	atomic.StoreInt32(&b.alive, 1)
 	return b
+}
+
+func (b *Backend) GetWeight() int64 {
+	return atomic.LoadInt64(&b.weight)
+}
+
+func (b *Backend) SetWeight(weight int64) {
+	atomic.StoreInt64(&b.weight, weight)
 }
 
 func (b *Backend) IsAlive() bool {

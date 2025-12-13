@@ -22,7 +22,7 @@ type Config struct {
 
 type BackendCfg struct {
 	Address string `yaml:"address" json:"address" toml:"address"`
-	Weight  int    `yaml:"weight" json:"weight" toml:"weight"`
+	Weight  int64    `yaml:"weight" json:"weight" toml:"weight"`
 }
 
 type HealthCfg struct {
