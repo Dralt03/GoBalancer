@@ -3,5 +3,5 @@ package balancer
 import "LoadBalancer/internal/backend"
 
 type Balancer interface {
-	Pick() (*backend.Backend, error)
+	Pick(key string) (*backend.Backend, error)
 }

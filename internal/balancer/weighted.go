@@ -18,7 +18,7 @@ func NewWeightedBalancer(pool *backend.Pool) *Weighted{
 
 // Picking a backend based on the minimum score for the backend achieved using the formula:
 // score = (connections + 1) / weight
-func (w *Weighted) Pick() (*backend.Backend, error){
+func (w *Weighted) Pick(_ string) (*backend.Backend, error){
 	backends := w.pool.AliveSnapshot()
 	n := len(backends)
 	if n == 0 {

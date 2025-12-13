@@ -37,6 +37,8 @@ func main() {
 		lb = balancer.NewLeastConnectionsBalancer(pool)
 	case "weighted":
 		lb = balancer.NewWeightedBalancer(pool)
+	case "ip_hash":
+		lb = balancer.NewIPHashBalancer(pool)
 	default:
 		log.Fatalf("Invalid load balancing algorithm: %s", cfg.Algorithm)
 	}

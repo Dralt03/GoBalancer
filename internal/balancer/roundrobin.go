@@ -17,7 +17,7 @@ func NewRoundRobinBalancer(pool *backend.Pool) *RoundRobin{
 	}
 }
 
-func (rr *RoundRobin) Pick() (*backend.Backend, error) {
+func (rr *RoundRobin) Pick(_ string) (*backend.Backend, error) {
     backends := rr.pool.AliveSnapshot()
     n := len(backends)
     if n == 0 {

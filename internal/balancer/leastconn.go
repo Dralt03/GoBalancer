@@ -15,7 +15,7 @@ func NewLeastConnectionsBalancer(pool *backend.Pool) *LeastConnections{
 	}
 }
 
-func (lc *LeastConnections) Pick() (*backend.Backend, error){
+func (lc *LeastConnections) Pick(_ string) (*backend.Backend, error){
 	backends := lc.pool.AliveSnapshot()
 	n := len(backends)
 	if n == 0 {
