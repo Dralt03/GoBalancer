@@ -9,13 +9,13 @@ type LeastConnections struct {
 	pool *backend.Pool
 }
 
-func NewLeastConnectionsBalancer(pool *backend.Pool) *LeastConnections{
+func NewLeastConnectionsBalancer(pool *backend.Pool) *LeastConnections {
 	return &LeastConnections{
 		pool: pool,
 	}
 }
 
-func (lc *LeastConnections) Pick(_ string) (*backend.Backend, error){
+func (lc *LeastConnections) Pick(_ string) (*backend.Backend, error) {
 	backends := lc.pool.AliveSnapshot()
 	n := len(backends)
 	if n == 0 {

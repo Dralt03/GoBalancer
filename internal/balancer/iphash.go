@@ -13,20 +13,20 @@ type IPHash struct {
 	pool *backend.Pool
 }
 
-func NewIPHashBalancer(pool *backend.Pool) *IPHash{
+func NewIPHashBalancer(pool *backend.Pool) *IPHash {
 	return &IPHash{
 		pool: pool,
 	}
 }
 
-func hrwHash(key, backend string) uint64{
+func hrwHash(key, backend string) uint64 {
 	h := fnv.New64a()
 	h.Write([]byte(key))
 	h.Write([]byte(backend))
 	return h.Sum64()
 }
 
-func (ip *IPHash) Pick(clientIP string) (*backend.Backend, error){
+func (ip *IPHash) Pick(clientIP string) (*backend.Backend, error) {
 	backends := ip.pool.AliveSnapshot()
 	n := len(backends)
 	if n == 0 {

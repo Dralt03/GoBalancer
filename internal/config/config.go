@@ -15,14 +15,14 @@ type Config struct {
 	ListenAddress string       `yaml:"listen_address" json:"listen_address" toml:"listen_address"`
 	UseIOUring    bool         `yaml:"use_iouring" json:"use_iouring" toml:"use_iouring"`
 	Algorithm     string       `yaml:"algorithm" json:"algorithm" toml:"algorithm"`
-	Backends       []BackendCfg `yaml:"backends" json:"backends" toml:"backends"`
+	Backends      []BackendCfg `yaml:"backends" json:"backends" toml:"backends"`
 	HealthCheck   HealthCfg    `yaml:"health_check" json:"health_check" toml:"health_check"`
 	Timeout       TimeoutCfg   `yaml:"timeout" json:"timeout" toml:"timeout"`
 }
 
 type BackendCfg struct {
 	Address string `yaml:"address" json:"address" toml:"address"`
-	Weight  int64    `yaml:"weight" json:"weight" toml:"weight"`
+	Weight  int64  `yaml:"weight" json:"weight" toml:"weight"`
 }
 
 type HealthCfg struct {

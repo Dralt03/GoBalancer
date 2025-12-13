@@ -36,14 +36,14 @@ func (p *Pool) RemoveBackend(address string) bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	if _, ok := p.index[address]; !ok{
+	if _, ok := p.index[address]; !ok {
 		return false
 	}
 
 	delete(p.index, address)
 	newBackends := make([]*Backend, 0, len(p.backends)-1)
-	for _, b := range p.backends{
-		if b.Address == address{
+	for _, b := range p.backends {
+		if b.Address == address {
 			continue
 		}
 		newBackends = append(newBackends, b)
@@ -69,7 +69,7 @@ func (p *Pool) GetBackend(address string) (*Backend, error) {
 	return nil, errors.New("backend not found")
 }
 
-func (p *Pool) HasBackend(address string) bool{
+func (p *Pool) HasBackend(address string) bool {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 	_, ok := p.index[address]

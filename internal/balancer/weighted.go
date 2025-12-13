@@ -10,7 +10,7 @@ type Weighted struct {
 	pool *backend.Pool
 }
 
-func NewWeightedBalancer(pool *backend.Pool) *Weighted{
+func NewWeightedBalancer(pool *backend.Pool) *Weighted {
 	return &Weighted{
 		pool: pool,
 	}
@@ -18,7 +18,7 @@ func NewWeightedBalancer(pool *backend.Pool) *Weighted{
 
 // Picking a backend based on the minimum score for the backend achieved using the formula:
 // score = (connections + 1) / weight
-func (w *Weighted) Pick(_ string) (*backend.Backend, error){
+func (w *Weighted) Pick(_ string) (*backend.Backend, error) {
 	backends := w.pool.AliveSnapshot()
 	n := len(backends)
 	if n == 0 {
@@ -34,9 +34,9 @@ func (w *Weighted) Pick(_ string) (*backend.Backend, error){
 			continue
 		}
 
-		score := float64(b.ConnCount()+1)/float64(weight)
+		score := float64(b.ConnCount()+1) / float64(weight)
 
-		if score < minScore{
+		if score < minScore {
 			minScore = score
 			selected = b
 		}
