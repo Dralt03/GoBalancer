@@ -32,12 +32,12 @@ func (p *Pool) AddBackend(address string, weight int64) (*Backend, error) {
 	return b, nil
 }
 
-func (p *Pool) RemoveBackend(address string) (bool, error) {
+func (p *Pool) RemoveBackend(address string) bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
 	if _, ok := p.index[address]; !ok{
-		return false, errors.New("backend not found")
+		return false
 	}
 
 	delete(p.index, address)
@@ -49,13 +49,15 @@ func (p *Pool) RemoveBackend(address string) (bool, error) {
 		newBackends = append(newBackends, b)
 	}
 	p.backends = newBackends
-	return true, nil
+	return true
 }
 
 func (p *Pool) GetBackends() []*Backend {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
-	return p.backends
+	out := make([]*Backend, len(p.backends))
+	copy(out, p.backends)
+	return out
 }
 
 func (p *Pool) GetBackend(address string) (*Backend, error) {
@@ -67,6 +69,13 @@ func (p *Pool) GetBackend(address string) (*Backend, error) {
 	return nil, errors.New("backend not found")
 }
 
+func (p *Pool) HasBackend(address string) bool{
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	_, ok := p.index[address]
+	return ok
+}
+
 func (p *Pool) Len() int {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
@@ -74,22 +83,23 @@ func (p *Pool) Len() int {
 }
 
 func (p *Pool) UpdateWeight(address string, weight int64) error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.mu.RLock()
+	b, ok := p.index[address]
+	p.mu.RUnlock()
 
-	if _, ok := p.index[address]; !ok {
+	if !ok {
 		return errors.New("backend not found")
 	}
 
-	p.index[address].SetWeight(weight)
+	b.SetWeight(weight)
 	return nil
 }
 
 func (p *Pool) MarkAlive(address string) error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
+	p.mu.RLock()
 	b, ok := p.index[address]
+	p.mu.RUnlock()
+
 	if !ok {
 		return errors.New("backend not found")
 	}
@@ -99,14 +109,26 @@ func (p *Pool) MarkAlive(address string) error {
 }
 
 func (p *Pool) MarkDead(address string) error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
+	p.mu.RLock()
 	b, ok := p.index[address]
+	p.mu.RUnlock()
+
 	if !ok {
 		return errors.New("backend not found")
 	}
 
 	b.MarkDead()
 	return nil
+}
+
+func (p *Pool) AliveSnapshot() []*Backend {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	out := make([]*Backend, 0, len(p.backends))
+	for _, b := range p.backends {
+		if b.IsAlive() {
+			out = append(out, b)
+		}
+	}
+	return out
 }
