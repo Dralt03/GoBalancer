@@ -12,6 +12,7 @@ import (
 	"LoadBalancer/internal/balancer"
 	"LoadBalancer/internal/config"
 	"LoadBalancer/internal/health"
+	"LoadBalancer/internal/proxy"
 )
 
 func main() {
@@ -46,7 +47,7 @@ func main() {
 	hc := health.New(pool, cfg.HealthCheck)
 	go hc.start()
 
-	pxy, err := proxy.New(
+	pxy, err := proxy.NewProxy(
 		cfg.ListenAddress,
 		lb,
 		proxy.Options{
