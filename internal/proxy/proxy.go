@@ -13,10 +13,10 @@ type Proxy struct {
 	listener net.Listener
 	handler  *Handler
 
-	wg sync.WaitGroup
+	wg       sync.WaitGroup
 	stopOnce sync.Once
 
-	ctx context.Context
+	ctx    context.Context
 	cancel context.CancelFunc
 
 	stopped int32
@@ -31,9 +31,9 @@ func NewProxy(address string, handler *Handler) (*Proxy, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &Proxy{
 		listener: listener,
-		handler: handler,
-		ctx: ctx,
-		cancel: cancel,
+		handler:  handler,
+		ctx:      ctx,
+		cancel:   cancel,
 	}, nil
 }
 
@@ -47,7 +47,7 @@ func (p *Proxy) Start() error {
 				return nil
 			}
 
-			if errors.Is(err, net.ErrClosed){
+			if errors.Is(err, net.ErrClosed) {
 				return nil
 			}
 
@@ -60,32 +60,31 @@ func (p *Proxy) Start() error {
 	}
 }
 
-func (p *Proxy) handleConnection(conn net.Conn){
+func (p *Proxy) handleConnection(conn net.Conn) {
 	defer p.wg.Done()
 	p.handler.Handle(p.ctx, conn)
 }
 
-
 func (p *Proxy) Stop(ctx context.Context) error {
 	var err error
 
-	p.stopOnce.Do(func(){
+	p.stopOnce.Do(func() {
 		atomic.StoreInt32(&p.stopped, 1)
 		err = p.listener.Close()
 		p.cancel()
 	})
 
 	done := make(chan struct{})
-	go func(){
+	go func() {
 		p.wg.Wait()
 		close(done)
 	}()
 
 	select {
-	case <- done:
+	case <-done:
 		log.Printf("Proxy Closed")
 		return err
-	case <- ctx.Done():
+	case <-ctx.Done():
 		log.Printf("Context Done")
 		return ctx.Err()
 	}
