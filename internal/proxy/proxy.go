@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"LoadBalancer/internal/config"
 	"context"
 	"errors"
 	"log"
@@ -8,6 +9,11 @@ import (
 	"sync"
 	"sync/atomic"
 )
+
+type Options struct {
+	IOUring bool
+	Timeout config.TimeoutCfg
+}
 
 type Proxy struct {
 	listener net.Listener
@@ -22,16 +28,18 @@ type Proxy struct {
 	stopped int32
 }
 
-func NewProxy(address string, handler *Handler) (*Proxy, error) {
+func NewProxy(address string, balancer Balancer, options Options) (*Proxy, error) {
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return nil, err
 	}
 
+	h := NewHandler(balancer, options.Timeout)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	return &Proxy{
 		listener: listener,
-		handler:  handler,
+		handler:  h,
 		ctx:      ctx,
 		cancel:   cancel,
 	}, nil

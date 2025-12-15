@@ -51,7 +51,7 @@ func main() {
 		cfg.ListenAddress,
 		lb,
 		proxy.Options{
-			IOUring: cfg.IOUring,
+			IOUring: cfg.UseIOUring,
 			Timeout: cfg.Timeout,
 		})
 	if err != nil {
