@@ -45,7 +45,7 @@ func main() {
 	}
 
 	hc := health.New(pool, cfg.HealthCheck)
-	go hc.Start()
+	go hc.start()
 
 	pxy, err := proxy.NewProxy(
 		cfg.ListenAddress,
