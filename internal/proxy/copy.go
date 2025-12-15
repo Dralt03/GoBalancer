@@ -6,10 +6,10 @@ import (
 	"sync"
 )
 
-func pipe(a, b net.Conn){
+func pipe(a, b net.Conn) {
 	var wg sync.WaitGroup
 	wg.Add(2)
-	go func(){
+	go func() {
 		defer wg.Done()
 		_, err := io.Copy(b, a)
 		if err != nil {
@@ -18,7 +18,7 @@ func pipe(a, b net.Conn){
 		closeWrite(b)
 	}()
 
-	go func(){
+	go func() {
 		defer wg.Done()
 		_, err := io.Copy(a, b)
 		if err != nil {
@@ -30,7 +30,7 @@ func pipe(a, b net.Conn){
 	wg.Wait()
 }
 
-func closeWrite(conn net.Conn){
+func closeWrite(conn net.Conn) {
 	if tcp, ok := conn.(*net.TCPConn); ok {
 		tcp.CloseWrite()
 	}
