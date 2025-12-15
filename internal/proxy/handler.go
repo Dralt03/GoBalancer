@@ -47,5 +47,5 @@ func (h *Handler) Handle(ctx context.Context, conn net.Conn) {
 	}
 	defer backendConn.Close()
 
-	pipe(conn, backendConn)
+	pipe(ctx, conn, backendConn)
 }
