@@ -79,12 +79,25 @@ func main() {
 	events := make(chan discovery.Event, 128)
 
 	// Initialize discovery services
-	dockerDiscover := docker.NewDockerDiscover()
-	// TODO: Replace with actual config values
-	k8sDiscover := kubernetes.NewKubernetesDiscover("default", "my-service")
-
-	go dockerDiscover.Run(ctx, events)
-	go k8sDiscover.Run(ctx, events)
+	switch cfg.Discovery.Type {
+	case "docker":
+		logging.L().Info("Using Docker discovery")
+		dockerDiscover := docker.NewDockerDiscover()
+		if dockerDiscover != nil {
+			go dockerDiscover.Run(ctx, events)
+		}
+	case "kubernetes":
+		logging.L().Info("Using Kubernetes discovery")
+		k8sDiscover := kubernetes.NewKubernetesDiscover(
+			cfg.Discovery.Kubernetes.Namespace,
+			cfg.Discovery.Kubernetes.Service,
+		)
+		go k8sDiscover.Run(ctx, events)
+	case "static":
+		logging.L().Info("Using static discovery")
+	default:
+		logging.L().Warn("Unknown discovery type, defaulting to static", zap.String("type", cfg.Discovery.Type))
+	}
 
 	registry := backend.NewRegistry(pool)
 

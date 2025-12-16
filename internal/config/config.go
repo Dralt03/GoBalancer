@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"strings"
+
 	"github.com/pelletier/go-toml/v2"
 	"gopkg.in/yaml.v3"
 )
@@ -18,6 +20,22 @@ type Config struct {
 	Backends      []BackendCfg `yaml:"backends" json:"backends" toml:"backends"`
 	HealthCheck   HealthCfg    `yaml:"health_check" json:"health_check" toml:"health_check"`
 	Timeout       TimeoutCfg   `yaml:"timeout" json:"timeout" toml:"timeout"`
+	Discovery     DiscoveryCfg `yaml:"discovery" json:"discovery" toml:"discovery"`
+}
+
+type DiscoveryCfg struct {
+	Type       string         `yaml:"type" json:"type" toml:"type"`
+	Docker     *DockerCfg     `yaml:"docker,omitempty" json:"docker,omitempty" toml:"docker,omitempty"`
+	Kubernetes *KubernetesCfg `yaml:"kubernetes,omitempty" json:"kubernetes,omitempty" toml:"kubernetes,omitempty"`
+}
+
+type DockerCfg struct {
+	// Add Docker specific config here if needed
+}
+
+type KubernetesCfg struct {
+	Namespace string `yaml:"namespace" json:"namespace" toml:"namespace"`
+	Service   string `yaml:"service" json:"service" toml:"service"`
 }
 
 type BackendCfg struct {
@@ -93,6 +111,23 @@ func (c *Config) validate() error {
 		return errors.New("invalid load balancing algorithm")
 	}
 
+	switch c.Discovery.Type {
+	case "docker":
+		if c.Discovery.Docker == nil {
+			return errors.New("docker discovery selected but config is missing")
+		}
+	case "kubernetes":
+		if c.Discovery.Kubernetes == nil {
+			return errors.New("kubernetes discovery selected but config is missing")
+		}
+		if c.Discovery.Kubernetes.Namespace == "" || c.Discovery.Kubernetes.Service == "" {
+			return errors.New("kubernetes discovery requires namespace and service")
+		}
+	case "static":
+	default:
+		return fmt.Errorf("invalid discovery type: %s", c.Discovery.Type)
+	}
+
 	return nil
 }
 
@@ -119,4 +154,9 @@ func (c *Config) applyDefaults() {
 	if c.Timeout.ConnectTimeout == 0 {
 		c.Timeout.ConnectTimeout = 3
 	}
+	
+	if c.Discovery.Type == "" {
+		c.Discovery.Type = "static"
+	}
+	c.Discovery.Type = strings.ToLower(c.Discovery.Type)
 }

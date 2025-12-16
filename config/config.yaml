@@ -18,3 +18,11 @@ timeout:
   client_idle_sec: 30
   backend_idle_sec: 30
   connect_timeout: 3
+
+discovery:
+  type: "static" # Options: static, docker, kubernetes
+  # docker:
+  #   # docker config
+  # kubernetes:
+  #   namespace: "default"
+  #   service: "my-service"
