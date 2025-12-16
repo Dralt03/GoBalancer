@@ -16,6 +16,9 @@ import (
 	"LoadBalancer/internal/logging"
 	"LoadBalancer/internal/proxy"
 	"LoadBalancer/pkg/api"
+	"LoadBalancer/pkg/discovery"
+	"LoadBalancer/pkg/discovery/docker"
+	"LoadBalancer/pkg/discovery/kubernetes"
 
 	"go.uber.org/zap"
 )
@@ -69,6 +72,28 @@ func main() {
 		logging.L().Fatal("Failed to create proxy", zap.Error(err))
 	}
 
+	// App context for long-running services
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel() // Ensure cleanup if main exits early
+
+	events := make(chan discovery.Event, 128)
+
+	// Initialize discovery services
+	dockerDiscover := docker.NewDockerDiscover()
+	// TODO: Replace with actual config values
+	k8sDiscover := kubernetes.NewKubernetesDiscover("default", "my-service")
+
+	go dockerDiscover.Run(ctx, events)
+	go k8sDiscover.Run(ctx, events)
+
+	registry := backend.NewRegistry(pool)
+
+	go func() {
+		for e := range events {
+			registry.Apply(e)
+		}
+	}()
+
 	go func() {
 		if err := pxy.Start(); err != nil {
 			logging.L().Fatal("Failed to start proxy", zap.Error(err))
@@ -93,14 +118,18 @@ func main() {
 	<-sigC
 	logging.L().Info("Shutting down gracefully...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	// Cancel long-running services
+	cancel()
 
-	if err := pxy.Stop(ctx); err != nil {
+	// Shutdown context with timeout
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
+
+	if err := pxy.Stop(shutdownCtx); err != nil {
 		logging.L().Error("Failed to stop proxy", zap.Error(err))
 	}
 
-	if err := apiServer.Stop(ctx); err != nil {
+	if err := apiServer.Stop(shutdownCtx); err != nil {
 		logging.L().Error("Failed to stop API server", zap.Error(err))
 	}
 

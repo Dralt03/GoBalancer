@@ -13,10 +13,10 @@ type Server struct {
 func New(address string, handler http.Handler) *Server {
 	return &Server{
 		http: &http.Server{
-			Addr:    address,
-			Handler: handler,
-			ReadTimeout: 5*time.Second,
-			WriteTimeout: 5*time.Second,
+			Addr:         address,
+			Handler:      handler,
+			ReadTimeout:  5 * time.Second,
+			WriteTimeout: 5 * time.Second,
 		},
 	}
 }

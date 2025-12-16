@@ -30,5 +30,8 @@ func Init(level, format string) error {
 }
 
 func L() *zap.Logger {
+	if log == nil {
+		return zap.NewNop()
+	}
 	return log
 }

@@ -112,5 +112,3 @@ func (h *Handler) BackendByAddress(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
-
-
