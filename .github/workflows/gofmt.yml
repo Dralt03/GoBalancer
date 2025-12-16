@@ -19,9 +19,9 @@ jobs:
       - name: Verify formatting
         run: |
           if [ -n "$(gofmt -l .)" ]; then
-            echo "❌ The following files are not formatted:"
+            echo "The following files are not formatted:"
             gofmt -l .
             echo "Please run 'gofmt -w .' locally"
             exit 1
           fi
-          echo "✅ All files formatted correctly"
+          echo "All files formatted correctly"

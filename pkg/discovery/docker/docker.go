@@ -37,7 +37,7 @@ func (d *dockerDiscover) Run(ctx context.Context, apiEvents chan<- discovery.Eve
 	if d.client == nil {
 		return fmt.Errorf("docker client not initialized")
 	}
-	
+
 	logging.L().Info("Docker discovery started")
 
 	// 1. Initial Sync: List existing containers
@@ -148,6 +148,6 @@ func (d *dockerDiscover) handleRemove(containerID string, apiEvents chan<- disco
 		Type:    discovery.BackendRemove,
 		Address: addr,
 	}
-	
+
 	delete(d.containers, containerID)
 }

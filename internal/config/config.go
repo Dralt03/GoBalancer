@@ -154,7 +154,7 @@ func (c *Config) applyDefaults() {
 	if c.Timeout.ConnectTimeout == 0 {
 		c.Timeout.ConnectTimeout = 3
 	}
-	
+
 	if c.Discovery.Type == "" {
 		c.Discovery.Type = "static"
 	}
