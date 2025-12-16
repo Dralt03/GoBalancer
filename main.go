@@ -12,7 +12,10 @@ import (
 	"LoadBalancer/internal/balancer"
 	"LoadBalancer/internal/config"
 	"LoadBalancer/internal/health"
+	"LoadBalancer/internal/logging"
 	"LoadBalancer/internal/proxy"
+
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -21,6 +24,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
+
+	if err := logging.Init("info", "console"); err != nil {
+		log.Fatalf("Failed to initialise logger: %v", err)
+	}
+
+	defer logging.L().Sync()
 
 	//Initialise backend pool
 	pool := backend.NewPool()
@@ -41,7 +50,7 @@ func main() {
 	case "ip_hash":
 		lb = balancer.NewIPHashBalancer(pool)
 	default:
-		log.Fatalf("Invalid load balancing algorithm: %s", cfg.Algorithm)
+		logging.L().Fatal("Invalid load balancing algorithm", zap.String("algorithm", cfg.Algorithm))
 	}
 
 	hc := health.New(pool, cfg.HealthCheck)
@@ -55,12 +64,12 @@ func main() {
 			Timeout: cfg.Timeout,
 		})
 	if err != nil {
-		log.Fatalf("Failed to create proxy: %v", err)
+		logging.L().Fatal("Failed to create proxy", zap.Error(err))
 	}
 
 	go func() {
 		if err := pxy.Start(); err != nil {
-			log.Fatalf("Failed to start proxy: %v", err)
+			logging.L().Fatal("Failed to start proxy", zap.Error(err))
 		}
 	}()
 
@@ -69,13 +78,13 @@ func main() {
 	signal.Notify(sigC, syscall.SIGINT, syscall.SIGTERM)
 
 	<-sigC
-	log.Println("Shutting down gracefully...")
+	logging.L().Info("Shutting down gracefully...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := pxy.Stop(ctx); err != nil {
-		log.Printf("Failed to stop proxy: %v", err)
+		logging.L().Error("Failed to stop proxy", zap.Error(err))
 	}
-	log.Println("Load Balanced exited cleanly.")
+	logging.L().Info("Load Balanced exited cleanly.")
 }

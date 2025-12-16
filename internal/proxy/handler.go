@@ -3,10 +3,12 @@ package proxy
 import (
 	"LoadBalancer/internal/backend"
 	"LoadBalancer/internal/config"
+	"LoadBalancer/internal/logging"
 	"context"
-	"log"
 	"net"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 type Balancer interface {
@@ -31,7 +33,7 @@ func (h *Handler) Handle(ctx context.Context, conn net.Conn) {
 	clientIP, _, _ := net.SplitHostPort(conn.RemoteAddr().String())
 	backend, err := h.Balancer.Pick(clientIP)
 	if err != nil {
-		log.Printf("failed to pick backend: %v", err)
+		logging.L().Error("failed to pick backend", zap.Error(err))
 		return
 	}
 	defer backend.DecConn()
@@ -39,7 +41,7 @@ func (h *Handler) Handle(ctx context.Context, conn net.Conn) {
 	timeout := time.Duration(h.Timeouts.ConnectTimeout) * time.Second
 	backendConn, err := net.DialTimeout("tcp", backend.Address, timeout)
 	if err != nil {
-		log.Printf("failed to connect to backend %s: %v", backend.Address, err)
+		logging.L().Error("failed to connect to backend", zap.String("backend_address", backend.Address), zap.Error(err))
 		return
 	}
 	defer backendConn.Close()

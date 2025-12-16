@@ -2,12 +2,14 @@ package proxy
 
 import (
 	"LoadBalancer/internal/config"
+	"LoadBalancer/internal/logging"
 	"context"
 	"errors"
-	"log"
 	"net"
 	"sync"
 	"sync/atomic"
+
+	"go.uber.org/zap"
 )
 
 type Options struct {
@@ -48,7 +50,7 @@ func NewProxy(address string, balancer Balancer, options Options) (*Proxy, error
 }
 
 func (p *Proxy) Start() error {
-	log.Printf("Proxy Listening on port: %s\n", p.listener.Addr().String())
+	logging.L().Info("Proxy Listening", zap.String("port", p.listener.Addr().String()))
 
 	for {
 		conn, err := p.listener.Accept()
@@ -61,7 +63,7 @@ func (p *Proxy) Start() error {
 				return nil
 			}
 
-			log.Printf("Accept error: %v\n", err)
+			logging.L().Error("Accept error", zap.Error(err))
 			continue
 		}
 
@@ -92,10 +94,10 @@ func (p *Proxy) Stop(ctx context.Context) error {
 
 	select {
 	case <-done:
-		log.Printf("Proxy Closed")
+		logging.L().Info("Proxy Closed")
 		return err
 	case <-ctx.Done():
-		log.Printf("Context Done")
+		logging.L().Info("Context Done")
 		return ctx.Err()
 	}
 }

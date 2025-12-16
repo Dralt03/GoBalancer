@@ -3,8 +3,8 @@ package health
 import (
 	"LoadBalancer/internal/backend"
 	"LoadBalancer/internal/config"
+	"LoadBalancer/internal/logging"
 	"context"
-	"log"
 	"net"
 	"sync"
 	"time"
@@ -61,7 +61,7 @@ func (c *Checker) runOnce() {
 }
 
 func (c *Checker) Start() {
-	log.Println("Health Checker Started")
+	logging.L().Info("Health Checker Started")
 
 	ticker := time.NewTicker(time.Duration(c.config.IntervalSec) * time.Second)
 	c.wg.Add(1)
@@ -73,7 +73,7 @@ func (c *Checker) Start() {
 			case <-ticker.C:
 				c.runOnce()
 			case <-c.ctx.Done():
-				log.Println("Health Checker Stopped")
+				logging.L().Info("Health Checker Stopped")
 				return
 			}
 		}
