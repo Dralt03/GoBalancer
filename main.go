@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,6 +15,7 @@ import (
 	"LoadBalancer/internal/health"
 	"LoadBalancer/internal/logging"
 	"LoadBalancer/internal/proxy"
+	"LoadBalancer/pkg/api"
 
 	"go.uber.org/zap"
 )
@@ -73,6 +75,17 @@ func main() {
 		}
 	}()
 
+	apiHandler := api.NewHandler(pool)
+	apiRouter := api.Routes(apiHandler)
+	apiServer := api.New(":8081", apiRouter)
+
+	go func() {
+		logging.L().Info("API Server Listening", zap.String("address", ":8081"))
+		if err := apiServer.Start(); err != nil && err != http.ErrServerClosed {
+			logging.L().Fatal("Failed to start API server", zap.Error(err))
+		}
+	}()
+
 	//Graceful Shutdown
 	sigC := make(chan os.Signal, 1) //Buffered channel to avoid missing signals
 	signal.Notify(sigC, syscall.SIGINT, syscall.SIGTERM)
@@ -86,5 +99,10 @@ func main() {
 	if err := pxy.Stop(ctx); err != nil {
 		logging.L().Error("Failed to stop proxy", zap.Error(err))
 	}
+
+	if err := apiServer.Stop(ctx); err != nil {
+		logging.L().Error("Failed to stop API server", zap.Error(err))
+	}
+
 	logging.L().Info("Load Balanced exited cleanly.")
 }
