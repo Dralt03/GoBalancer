@@ -36,11 +36,8 @@ func (h *Handler) Handle(ctx context.Context, conn net.Conn) {
 	}
 	defer backend.DecConn()
 
-	dialer := &net.Dialer{
-		Timeout: time.Duration(h.Timeouts.ConnectTimeout) * time.Second,
-	}
-
-	backendConn, err := dialer.DialContext(ctx, "tcp", backend.Address)
+	timeout := time.Duration(h.Timeouts.ConnectTimeout) * time.Second
+	backendConn, err := net.DialTimeout("tcp", backend.Address, timeout)
 	if err != nil {
 		log.Printf("failed to connect to backend %s: %v", backend.Address, err)
 		return

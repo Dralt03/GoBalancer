@@ -29,6 +29,8 @@ type Proxy struct {
 }
 
 func NewProxy(address string, balancer Balancer, options Options) (*Proxy, error) {
+	var err error
+
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return nil, err
