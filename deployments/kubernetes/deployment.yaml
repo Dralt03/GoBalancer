@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadbalancer
+  labels:
+    app: loadbalancer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loadbalancer
+  template:
+    metadata:
+      labels:
+        app: loadbalancer
+    spec:
+      serviceAccountName: default
+      containers:
+        - name: lb
+          image: loadbalancer:latest
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+          ports:
+            - containerPort: 8080
+              name: http
+      volumes:
+        - name: config-volume
+          configMap:
+            name: loadbalancer-config

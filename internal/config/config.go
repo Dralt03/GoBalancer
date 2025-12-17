@@ -96,8 +96,9 @@ func (c *Config) validate() error {
 		return errors.New("listen Address is empty")
 	}
 
-	if len(c.Backends) == 0 {
-		return errors.New("no Backends are specified")
+	// If discovery is static, we need at least one backend
+	if c.Discovery.Type == "static" && len(c.Backends) == 0 {
+		return errors.New("no backends specified for static discovery")
 	}
 
 	validModes := map[string]bool{

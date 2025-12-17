@@ -1,0 +1,21 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: lb-discovery-role
+rules:
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: lb-discovery-binding
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: lb-discovery-role
+  apiGroup: rbac.authorization.k8s.io
