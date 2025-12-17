@@ -57,38 +57,6 @@ GoBalancer is designed for high throughput and low latency:
 - **Concurrent health checks**: Non-blocking health probe execution
 - **Lock-free counters**: Atomic operations for frequently-accessed fields
 
-## Thread Safety & Concurrency
-
-GoBalancer uses a **hybrid synchronization strategy** for optimal performance under high concurrency:
-
-### Backend Node Synchronization
-
-The `Backend` struct is fully thread-safe and can be accessed concurrently from multiple goroutines:
-
-**Atomic Operations** (Lock-Free):
-- `alive` (int32) - Backend health status
-- `connCount` (int64) - Active connection counter
-- `consecutiveFailures` (int32) - Failure tracking
-- `consecutiveSuccess` (int32) - Success tracking
-
-These fields use `sync/atomic` operations for lock-free reads and writes, providing optimal performance for high-frequency operations like connection tracking and health status checks.
-
-**RWMutex Protection**:
-- `lastSuccess` (time.Time) - Last successful health check timestamp
-- `lastFailed` (time.Time) - Last failed health check timestamp
-
-Time fields use `sync.RWMutex` for safe concurrent access:
-- Multiple goroutines can read timestamps concurrently using `RLock()`
-- Write operations use exclusive `Lock()` to prevent data races
-
-### Design Rationale
-
-This hybrid approach balances performance and safety:
--  **Lock-free fast path**: Frequently accessed counters avoid mutex overhead
--  **Safe timestamp access**: Struct-type time.Time requires mutex protection
--  **Read-optimized**: RWMutex allows concurrent readers for timestamp queries
--  **Race-free**: All concurrent access is properly synchronized
-
 ## Running the Load Balancer
 
 ### Prerequisites
