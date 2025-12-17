@@ -131,6 +131,106 @@ The load balancer will:
 - Automatically health check backends
 - Route traffic based on the configured algorithm
 
+## REST API Server
+
+The REST API **runs automatically** on port `8081` when you start the load balancer. It provides runtime management capabilities.
+
+**Endpoints:**
+- `GET /health` - API health check
+- `GET /backends` - List all backends with status
+- `POST /backends` - Add a new backend
+- `GET /backends/{address}` - Get specific backend details
+- `PUT /backends/{address}` - Update backend weight
+- `DELETE /backends/{address}` - Remove a backend
+
+**Example:**
+```bash
+# List all backends
+curl http://localhost:8081/backends
+
+# Add a backend
+curl -X POST http://localhost:8081/backends \
+  -H "Content-Type: application/json" \
+  -d '{"address": "192.168.1.100:8080", "weight": 2}'
+```
+
+## Service Discovery
+
+GoBalancer supports three discovery modes:
+
+### 1. Static Discovery (Default)
+
+Backends are manually defined in `config.yaml`:
+
+```yaml
+discovery:
+  type: "static"
+
+backends:
+  - address: "10.0.0.4:3000"
+    weight: 1
+  - address: "10.0.0.5:3000"
+    weight: 2
+```
+
+### 2. Docker Discovery
+
+**Automatically discovers containers** with the `lb.enable=true` label.
+
+**Configuration:**
+```yaml
+discovery:
+  type: "docker"
+```
+
+**Docker Compose Example:**
+```yaml
+services:
+  gobalancer:
+    image: gobalancer
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # Required!
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+
+  backend1:
+    image: nginx:alpine
+    labels:
+      - "lb.enable=true"      # Required for discovery
+      - "lb.port=80"          # Optional, defaults to 80
+      - "lb.weight=2"         # Optional, defaults to 1
+```
+
+**How it works:**
+- Watches Docker events (container start/stop)
+- Automatically adds containers with `lb.enable=true` label
+- Uses container's internal IP address
+- Removes backends when containers stop
+
+### 3. Kubernetes Discovery
+
+**Automatically discovers pods** from a Kubernetes service.
+
+**Configuration:**
+```yaml
+discovery:
+  type: "kubernetes"
+  kubernetes:
+    namespace: "default"
+    service: "my-backend-service"
+```
+
+**Requirements:**
+- RBAC permissions to watch EndpointSlices (see `deployments/kubernetes/rbac.yaml`)
+- Backend pods must be part of a Kubernetes Service
+
+**How it works:**
+- Watches EndpointSlices for the specified service
+- Automatically adds/removes backends when pods scale
+- Only adds pods that are "ready" (respects readiness probes)
+- Uses pod IP addresses and service port
+
 ### Run with Docker
 
 ```bash
