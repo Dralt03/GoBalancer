@@ -4,12 +4,23 @@ A high-performance HTTP/TCP load balancer written in Go, designed with enterpris
 
 ## Features
 
-### Implemented
-
 - **Multiple Load Balancing Algorithms**
   - Round Robin - Evenly distribute requests across backends
   - Least Connections - Route to backend with fewest active connections
   - Weighted - Distribute based on backend capacity weights
+  - IP Hash - Consistent routing based on client IP address
+
+- **Service Discovery**
+  - Static configuration
+  - Docker container discovery
+  - Kubernetes service discovery
+  - Dynamic backend registration/deregistration
+
+- **REST API Management**
+  - Health check endpoint
+  - List all backends with status
+  - Add/remove backends dynamically
+  - Update backend weights at runtime
 
 - **Thread-Safe Backend Management**
   - Lock-free atomic operations for performance-critical counters
@@ -22,161 +33,19 @@ A high-performance HTTP/TCP load balancer written in Go, designed with enterpris
   - Automatic backend failover
   - Graceful backend recovery
 
-- **Configuration Management**
-  - YAML/TOML configuration support
-  - Flexible backend definitions
-  - Configurable health check parameters
-
 - **Production Ready**
   - Graceful shutdown handling
-  - Signal handling (SIGINT, SIGTERM)
-  - Docker containerization
-  - Kubernetes deployment configurations
+  - Docker and Kubernetes deployment
+  - Structured logging with Zap
 
 ### In Progress
 
-- **Advanced I/O**
-  - Platform-optimized I/O multiplexing (epoll, kqueue, io_uring)
-  - Connection pooling and buffer management
-  - Zero-copy optimizations where possible
+- Platform-optimized I/O multiplexing (epoll, kqueue, io_uring)
+- Connection pooling and buffer management
+- Zero-copy optimizations
+- Prometheus metrics endpoint
+- Distributed tracing support
 
-- **Observability**
-  - Structured logging with custom formatters
-  - Prometheus metrics endpoint (planned)
-
-## Project Structure
-
-```
-GoBalancer/
-├── internal/                    # Private application code
-│   ├── backend/                # Backend management
-│   │   ├── node.go            # Thread-safe backend node
-│   │   └── pool.go            # Backend pool management
-│   │
-│   ├── balancer/               # Load balancing algorithms
-│   │   ├── roundrobin.go      # Round-robin implementation
-│   │   ├── leastconn.go       # Least connections algorithm
-│   │   └── weighted.go        # Weighted distribution
-│   │
-│   ├── health/                 # Health checking
-│   │   └── checker.go         # Health probe implementations
-│   │
-│   ├── config/                 # Configuration loading
-│   │   └── config.go          # YAML/TOML config parser
-│   │
-│   ├── io/                     # High-performance I/O (in progress)
-│   │   ├── poller.go          # Event polling interface
-│   │   ├── epoll.go           # Linux epoll implementation
-│   │   ├── kqueue.go          # BSD/macOS kqueue implementation
-│   │   ├── uring.go           # io_uring support (Linux 5.1+)
-│   │   └── buffers.go         # Buffer pool management
-│   │
-│   ├── logging/                # Logging infrastructure
-│   │   ├── logger.go          # Logger implementation
-│   │   └── formatter.go       # Log formatters
-│   │
-│   └── proxy/                  # Proxy implementation (in progress)
-│
-├── pkg/                         # Public API
-│   └── api/                    # API client
-│       └── client.go          # Load balancer API client
-│
-├── config/                      # Configuration files
-│   └── config.yaml             # Sample configuration
-│
-├── deployments/                 # Deployment configurations
-│   ├── docker/
-│   │   ├── Dockerfile
-│   │   └── docker-compose.yaml
-│   └── kubernetes/
-│       ├── deployment.yaml    # K8s deployment
-│       ├── service.yaml       # K8s service
-│       ├── configmap.yaml     # Configuration
-│       └── rbac.yaml          # Role-based access control
-│
-├── scripts/                     # Build and utility scripts
-│   ├── build.sh               # Build script
-│   ├── release.sh             # Release automation
-│   └── test.sh                # Test runner
-│
-├── test/                        # Test files and fixtures
-│
-├── main.go                      # Application entry point
-├── go.mod                       # Go module definition
-└── LICENSE                      # MIT License
-```
-
-## Technology Stack
-
-- **Language**: Go 1.21+
-- **I/O Multiplexing**: Platform-specific (epoll/kqueue/io_uring)
-- **Deployment**: Docker, Kubernetes
-
-## Prerequisites
-
-- Go 1.21 or higher
-- Docker (optional, for containerized deployment)
-- Kubernetes cluster (optional, for K8s deployment)
-
-## Getting Started
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/Dralt03/GoBalancer.git
-cd GoBalancer
-
-# Install dependencies
-go mod download
-
-# Build the project
-go build -o gobalancer main.go
-```
-
-### Running
-
-```bash
-# Run directly
-./gobalancer
-
-# Or with Go
-go run main.go
-```
-
-## Docker Deployment
-
-```bash
-# Build Docker image
-docker build -f deployments/docker/Dockerfile -t gobalancer:latest .
-
-# Run with docker-compose
-docker-compose -f deployments/docker/docker-compose.yaml up
-```
-
-## Kubernetes Deployment
-
-```bash
-# Apply all Kubernetes configurations
-kubectl apply -f deployments/kubernetes/
-
-# Check deployment status
-kubectl get pods -l app=gobalancer
-kubectl get svc gobalancer
-```
-
-## Testing
-
-```bash
-# Run tests
-./scripts/test.sh
-
-# Or manually
-go test ./...
-
-# Run with coverage
-go test -cover ./...
-```
 
 ## Performance
 
@@ -220,41 +89,68 @@ This hybrid approach balances performance and safety:
 -  **Read-optimized**: RWMutex allows concurrent readers for timestamp queries
 -  **Race-free**: All concurrent access is properly synchronized
 
-## Roadmap
+## Running the Load Balancer
 
-### Completed
+### Prerequisites
 
-- [x] Implement core load balancing algorithms (Round Robin, Least Connections, Weighted)
-- [x] Add health checking system
-- [x] Configuration file support (YAML/TOML)
-- [x] Thread-safe backend management
-- [x] Graceful shutdown
-- [x] Docker deployment
-- [x] Kubernetes deployment manifests
+- Go 1.24 or higher
+- Docker (optional, for containerized deployment)
+- Kubernetes cluster (optional, for K8s deployment)
 
-### In Progress / Planned
+### Installation
 
-- [ ] Complete platform-specific I/O optimizations (epoll, kqueue, io_uring)
-- [ ] Finalize proxy implementation
-- [ ] Prometheus metrics endpoint
-- [ ] Structured logging system
-- [ ] Rate limiting
-- [ ] TLS/SSL termination
-- [ ] WebSocket support
-- [ ] gRPC load balancing
-- [ ] Admin API for runtime configuration
-- [ ] Hot reload capability
-- [ ] Connection pooling optimizations
+```bash
+# Clone the repository
+git clone https://github.com/Dralt03/GoBalancer.git
+cd GoBalancer
 
-## Contributing
+# Install dependencies
+go mod download
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+# Build the project
+go build -o gobalancer main.go
+```
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Configuration
+
+Edit `config/config.yaml`
+
+### Run Locally
+
+```bash
+# Run directly
+./gobalancer
+
+# Or with Go
+go run main.go
+```
+
+The load balancer will:
+- Listen on port `8080` for incoming requests
+- Expose REST API on port `8081` for management
+- Automatically health check backends
+- Route traffic based on the configured algorithm
+
+### Run with Docker
+
+```bash
+# Build Docker image
+docker build -f deployments/docker/Dockerfile -t gobalancer:latest .
+
+# Run with docker-compose
+docker-compose -f deployments/docker/docker-compose.yaml up
+```
+
+### Run on Kubernetes
+
+```bash
+# Apply all Kubernetes configurations
+kubectl apply -f deployments/kubernetes/
+
+# Check deployment status
+kubectl get pods -l app=gobalancer
+kubectl get svc gobalancer
+```
 
 ## License
 
