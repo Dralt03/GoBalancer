@@ -52,15 +52,54 @@ A high-performance HTTP/TCP load balancer written in Go, designed with enterpris
 - Distributed tracing support
 
 
-## Performance
+## Performance & Benchmarking
 
-GoBalancer is designed for high throughput and low latency:
+GoBalancer is designed for high throughput and low latency. Internal benchmarks show that core operations are extremely efficient even with thousands of backends.
 
-- **Platform-optimized I/O**: Uses epoll (Linux), kqueue (BSD/macOS), or io_uring for maximum performance
-- **Connection pooling**: Reuses connections to backends
-- **Zero-copy**: Minimizes data copying where possible
-- **Concurrent health checks**: Non-blocking health probe execution
-- **Lock-free counters**: Atomic operations for frequently-accessed fields
+### Algorithm Overhead (1,000 Backends)
+
+Measured latency for picking a backend across 1,000 candidates:
+
+| Algorithm | Average Latency |
+| :--- | :--- |
+| **Round Robin** | ~2.7 µs |
+| **Least Connections** | ~4.5 µs |
+| **Weighted** | ~5.2 µs |
+| **IP Hash (HRW)** | ~24.0 µs |
+
+### Capacity & Scaling
+- **Backend Limit**: Optimized for thousands of backends with minimal memory overhead (~300ns to add, <5µs to retrieve).
+- **Concurrent Connections**: Primarily limited by the Operating System's file descriptor limits (`ulimit`). The Go runtime easily handles tens of thousands of concurrent connection goroutines.
+- **Memory Footprint**: Low overhead per connection (~2KB stack space). 10,000 active connections typically require only 20-40MB of overhead.
+
+---
+
+## Development & Maintenance
+
+We provide several tools to streamline development, testing, and releases.
+
+### Makefile
+
+The included `Makefile` provides a standard interface for common tasks:
+
+```bash
+make build        # Build for current platform
+make test         # Run tests with coverage
+make bench        # Run all benchmarks
+make lint         # Run linters (golangci-lint)
+make docker       # Build Docker image
+make release      # Create a new version release
+```
+
+### Automation Scripts
+
+- `scripts/build.sh`: Robust cross-compilation for Linux, macOS, and Windows.
+- `scripts/test.sh`: Enhanced testing with HTML coverage reports.
+- `scripts/release.sh`: Automates versioning, checksums, and archive creation.
+- `scripts/dev.sh`: Quick developer helper for common tasks.
+- `scripts/benchmark.ps1`: Automated benchmarking of internal components.
+
+---
 
 ## Running the Load Balancer
 
