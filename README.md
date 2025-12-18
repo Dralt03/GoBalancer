@@ -1,5 +1,10 @@
 # GoBalancer
 
+[![CI](https://github.com/Dralt03/GoBalancer/actions/workflows/ci.yml/badge.svg)](https://github.com/Dralt03/GoBalancer/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Dralt03/GoBalancer)](https://goreportcard.com/report/github.com/Dralt03/GoBalancer)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/Dralt03/GoBalancer)](https://go.dev/)
+[![License](https://img.shields.io/github/license/Dralt03/GoBalancer)](LICENSE)
+
 A high-performance HTTP/TCP load balancer written in Go, designed with enterprise-grade features, modern load balancing algorithms, and thread-safe concurrent operations.
 
 ## Features
