@@ -5,7 +5,7 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/Dralt03/GoBalancer)](https://go.dev/)
 [![License](https://img.shields.io/github/license/Dralt03/GoBalancer)](LICENSE)
 
-A high-performance HTTP/TCP load balancer written in Go, designed with enterprise-grade features, modern load balancing algorithms, and thread-safe concurrent operations.
+A high-performance TCP load balancer written in Go, designed with enterprise-grade features, multiple load balancing algorithms, and thread-safe concurrent operations.
 
 ## Features
 
@@ -43,20 +43,16 @@ A high-performance HTTP/TCP load balancer written in Go, designed with enterpris
   - Docker and Kubernetes deployment
   - Structured logging with Zap
 
-### In Progress
-
-- Platform-optimized I/O multiplexing (epoll, kqueue, io_uring)
-- Connection pooling and buffer management
-- Zero-copy optimizations
-- Prometheus metrics endpoint
-- Distributed tracing support
-
-
 ## Performance & Benchmarking
 
 GoBalancer is designed for high throughput and low latency. Internal benchmarks show that core operations are extremely efficient even with thousands of backends.
 
 ### Algorithm Overhead (1,000 Backends)
+
+To run benchmark test:
+```bash
+go test -v -bench . -benchmem ./internal/balancer/..
+```
 
 Measured latency for picking a backend across 1,000 candidates:
 
@@ -68,7 +64,7 @@ Measured latency for picking a backend across 1,000 candidates:
 | **IP Hash (HRW)** | ~24.0 µs |
 
 ### Capacity & Scaling
-- **Backend Limit**: Optimized for thousands of backends with minimal memory overhead (~300ns to add, <5µs to retrieve).
+- **Backend Limit**: Optimized for thousands of backends with minimal memory overhead.
 - **Concurrent Connections**: Primarily limited by the Operating System's file descriptor limits (`ulimit`). The Go runtime easily handles tens of thousands of concurrent connection goroutines.
 - **Memory Footprint**: Low overhead per connection (~2KB stack space). 10,000 active connections typically require only 20-40MB of overhead.
 
@@ -77,29 +73,6 @@ Measured latency for picking a backend across 1,000 candidates:
 ## Development & Maintenance
 
 We provide several tools to streamline development, testing, and releases.
-
-### Makefile
-
-The included `Makefile` provides a standard interface for common tasks:
-
-```bash
-make build        # Build for current platform
-make test         # Run tests with coverage
-make bench        # Run all benchmarks
-make lint         # Run linters (golangci-lint)
-make docker       # Build Docker image
-make release      # Create a new version release
-```
-
-### Automation Scripts
-
-- `scripts/build.sh`: Robust cross-compilation for Linux, macOS, and Windows.
-- `scripts/test.sh`: Enhanced testing with HTML coverage reports.
-- `scripts/release.sh`: Automates versioning, checksums, and archive creation.
-- `scripts/dev.sh`: Quick developer helper for common tasks.
-- `scripts/benchmark.ps1`: Automated benchmarking of internal components.
-
----
 
 ## Running the Load Balancer
 
