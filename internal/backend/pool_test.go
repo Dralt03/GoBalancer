@@ -190,7 +190,10 @@ func TestAliveSnapshot(t *testing.T) {
 	}
 
 	// Mark one dead
-	pool.MarkDead("10.0.0.2:8080")
+	err := pool.MarkDead("10.0.0.2:8080")
+	if err != nil {
+		t.Fatalf("Failed to mark backend dead: %v", err)
+	}
 	alive = pool.AliveSnapshot()
 	if len(alive) != 2 {
 		t.Errorf("Expected 2 alive backends, got %d", len(alive))
@@ -236,9 +239,9 @@ func TestConcurrentAccess(t *testing.T) {
 		wg.Add(1)
 		go func(addr string) {
 			defer wg.Done()
-			pool.UpdateWeight(addr, 5)
-			pool.MarkDead(addr)
-			pool.MarkAlive(addr)
+			_ = pool.UpdateWeight(addr, 5)
+			_ = pool.MarkDead(addr)
+			_ = pool.MarkAlive(addr)
 		}(b.Address)
 	}
 	wg.Wait()
