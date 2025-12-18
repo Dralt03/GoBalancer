@@ -19,8 +19,8 @@ func pipe(ctx context.Context, a, b net.Conn) {
 		select {
 		case <-ctx.Done():
 			// Shutdown signal received, force close connections
-			a.SetDeadline(time.Now())
-			b.SetDeadline(time.Now())
+			_ = a.SetDeadline(time.Now())
+			_ = b.SetDeadline(time.Now())
 		case <-done:
 			// Normal completion, exit to avoid leak
 			return
@@ -51,6 +51,6 @@ func pipe(ctx context.Context, a, b net.Conn) {
 
 func closeWrite(conn net.Conn) {
 	if tcp, ok := conn.(*net.TCPConn); ok {
-		tcp.CloseWrite()
+		_ = tcp.CloseWrite()
 	}
 }

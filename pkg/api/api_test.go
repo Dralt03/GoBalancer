@@ -53,7 +53,7 @@ func TestGetBackends(t *testing.T) {
 	}
 
 	// Add one
-	pool.AddBackend("10.0.0.1:8080", 1)
+	_, _ = pool.AddBackend("10.0.0.1:8080", 1)
 
 	resp, err = http.Get(server.URL + "/backends")
 	if err != nil {
@@ -114,7 +114,7 @@ func TestAddBackend(t *testing.T) {
 
 func TestBackendByAddress(t *testing.T) {
 	pool := backend.NewPool()
-	pool.AddBackend("10.0.0.3:8080", 5)
+	_, _ = pool.AddBackend("10.0.0.3:8080", 5)
 
 	h := NewHandler(pool)
 	server := httptest.NewServer(Routes(h))

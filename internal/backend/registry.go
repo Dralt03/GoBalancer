@@ -17,8 +17,8 @@ func NewRegistry(pool *Pool) *registry {
 func (r *registry) Apply(event discovery.Event) {
 	switch event.Type {
 	case discovery.BackendAdd:
-		r.pool.AddBackend(event.Address, event.Weight)
+		_, _ = r.pool.AddBackend(event.Address, event.Weight)
 	case discovery.BackendRemove:
-		r.pool.RemoveBackend(event.Address)
+		_ = r.pool.RemoveBackend(event.Address)
 	}
 }

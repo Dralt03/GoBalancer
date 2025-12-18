@@ -34,13 +34,15 @@ func main() {
 		log.Fatalf("Failed to initialise logger: %v", err)
 	}
 
-	defer logging.L().Sync()
+	defer func() { _ = logging.L().Sync() }()
 
 	//Initialise backend pool
 	pool := backend.NewPool()
 
-	for _, backend := range cfg.Backends {
-		pool.AddBackend(backend.Address, backend.Weight)
+	for _, b := range cfg.Backends {
+		if _, err := pool.AddBackend(b.Address, b.Weight); err != nil {
+			logging.L().Error("Failed to add initial backend", zap.String("address", b.Address), zap.Error(err))
+		}
 	}
 
 	var lb balancer.Balancer
@@ -84,7 +86,11 @@ func main() {
 		logging.L().Info("Using Docker discovery")
 		dockerDiscover := docker.NewDockerDiscover()
 		if dockerDiscover != nil {
-			go dockerDiscover.Run(ctx, events)
+			go func() {
+				if err := dockerDiscover.Run(ctx, events); err != nil {
+					logging.L().Error("Docker discovery failed", zap.Error(err))
+				}
+			}()
 		}
 	case "kubernetes":
 		logging.L().Info("Using Kubernetes discovery")
@@ -92,7 +98,11 @@ func main() {
 			cfg.Discovery.Kubernetes.Namespace,
 			cfg.Discovery.Kubernetes.Service,
 		)
-		go k8sDiscover.Run(ctx, events)
+		go func() {
+			if err := k8sDiscover.Run(ctx, events); err != nil {
+				logging.L().Error("Kubernetes discovery failed", zap.Error(err))
+			}
+		}()
 	case "static":
 		logging.L().Info("Using static discovery")
 	default:

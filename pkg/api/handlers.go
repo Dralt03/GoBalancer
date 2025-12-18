@@ -19,7 +19,7 @@ func NewHandler(pool *backend.Pool) *Handler {
 
 func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
+	_, _ = w.Write([]byte("OK"))
 }
 
 func (h *Handler) GetBackends(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +36,7 @@ func (h *Handler) GetBackends(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
+		_ = json.NewEncoder(w).Encode(response)
 
 	case http.MethodPost:
 		var req AddBackendRequest
@@ -53,7 +53,7 @@ func (h *Handler) GetBackends(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(Backend{
+		_ = json.NewEncoder(w).Encode(Backend{
 			Address:   b.Address,
 			Weight:    b.GetWeight(),
 			Alive:     b.IsAlive(),
@@ -81,7 +81,7 @@ func (h *Handler) BackendByAddress(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(Backend{
+		_ = json.NewEncoder(w).Encode(Backend{
 			Address:   b.Address,
 			Weight:    b.GetWeight(),
 			Alive:     b.IsAlive(),
