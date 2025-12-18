@@ -84,9 +84,9 @@ func TestWeighted(t *testing.T) {
 
 func TestIPHash(t *testing.T) {
 	pool := backend.NewPool()
-	pool.AddBackend("10.0.0.1:8080", 1)
-	pool.AddBackend("10.0.0.2:8080", 1)
-	pool.AddBackend("10.0.0.3:8080", 1)
+	_, _ = pool.AddBackend("10.0.0.1:8080", 1)
+	_, _ = pool.AddBackend("10.0.0.2:8080", 1)
+	_, _ = pool.AddBackend("10.0.0.3:8080", 1)
 
 	lb := NewIPHashBalancer(pool)
 
