@@ -6,20 +6,38 @@ import (
 	"testing"
 )
 
-func BenchmarkRoundRobin_Pick_1000(b *testing.B) {
-	benchmarkBalancer_Pick(b, "round_robin", 1000)
+var benchmarkCounts = []int{10, 100, 1000, 10000, 100000, 1000000, 10000000}
+
+func BenchmarkRoundRobin_Pick(b *testing.B) {
+	for _, count := range benchmarkCounts {
+		b.Run(fmt.Sprintf("%d", count), func(b *testing.B) {
+			benchmarkBalancer_Pick(b, "round_robin", count)
+		})
+	}
 }
 
-func BenchmarkLeastConnections_Pick_1000(b *testing.B) {
-	benchmarkBalancer_Pick(b, "least_connections", 1000)
+func BenchmarkLeastConnections_Pick(b *testing.B) {
+	for _, count := range benchmarkCounts {
+		b.Run(fmt.Sprintf("%d", count), func(b *testing.B) {
+			benchmarkBalancer_Pick(b, "least_connections", count)
+		})
+	}
 }
 
-func BenchmarkWeighted_Pick_1000(b *testing.B) {
-	benchmarkBalancer_Pick(b, "weighted", 1000)
+func BenchmarkWeighted_Pick(b *testing.B) {
+	for _, count := range benchmarkCounts {
+		b.Run(fmt.Sprintf("%d", count), func(b *testing.B) {
+			benchmarkBalancer_Pick(b, "weighted", count)
+		})
+	}
 }
 
-func BenchmarkIPHash_Pick_1000(b *testing.B) {
-	benchmarkBalancer_Pick(b, "ip_hash", 1000)
+func BenchmarkIPHash_Pick(b *testing.B) {
+	for _, count := range benchmarkCounts {
+		b.Run(fmt.Sprintf("%d", count), func(b *testing.B) {
+			benchmarkBalancer_Pick(b, "ip_hash", count)
+		})
+	}
 }
 
 func benchmarkBalancer_Pick(b *testing.B, algo string, count int) {

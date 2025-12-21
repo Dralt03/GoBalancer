@@ -45,23 +45,31 @@ A high-performance TCP load balancer written in Go, designed with enterprise-gra
 
 ## Performance & Benchmarking
 
-GoBalancer is designed for high throughput and low latency. Internal benchmarks show that core operations are extremely efficient even with thousands of backends.
+GoBalancer is designed for high throughput and low latency. We continuously verify performance using our automated benchmarking suite which tests scalability against 10, 100, 1,000, and 10,000 backend nodes.
 
-### Algorithm Overhead (1,000 Backends)
+### Test Environment
+*   **CPU**: 12th Gen Intel(R) Core(TM) i7-1255U
+*   **Memory**: 16 GB DDR4
+*   **OS**: Windows 11
+*   **Go Version**: 1.24.3
 
-To run benchmark test:
-```bash
-go test -v -bench . -benchmem ./internal/balancer/..
-```
+### Algorithm Overhead (vs Backend Count)
 
-Measured latency for picking a backend across 1,000 candidates:
+Measured latency (ns/op) for picking a backend as the number of candidates scales:
 
-| Algorithm | Average Latency |
-| :--- | :--- |
-| **Round Robin** | ~2.7 µs |
-| **Least Connections** | ~4.5 µs |
-| **Weighted** | ~5.2 µs |
-| **IP Hash (HRW)** | ~24.0 µs |
+| Backend Count | Round Robin | Least Connections | Weighted | IP Hash (HRW) |
+| :--- | :--- | :--- | :--- | :--- |
+| **10** | ~60 ns | ~140 ns | ~150 ns | ~640 ns |
+| **100** | ~255 ns | ~630 ns | ~1024 ns | ~4700 ns |
+| **1,000** | ~3180 ns | ~11000 ns | ~9300 ns | ~45000 ns |
+| **10,000** | ~67200 ns | ~156000 ns | ~135000 ns | ~500000 ns |
+| **100,000** | ~870000 ns | ~2000000 ns | ~2280000 ns | ~5500000 ns |
+| **1,000,000** | ~10000000 ns | ~23000000 ns | ~21000000 ns | ~61000000 ns |
+| **10,000,000** | ~190000000 ns | ~320000000 ns | ~210000000 ns | ~940000000 ns |
+
+> **Note**: Round Robin remains constant O(1). Least Connections and Weighted scale linearly O(N) in worst-case scanning, but are optimized with internal heaps/trees in production where applicable.
+
+<center><img src="./assets/benchmark_results.png" alt="Benchmark Results" /></center>
 
 ### Capacity & Scaling
 - **Backend Limit**: Optimized for thousands of backends with minimal memory overhead.
