@@ -69,7 +69,7 @@ Measured latency (ns/op) for picking a backend as the number of candidates scale
 
 > **Note**: Round Robin remains constant O(1). Least Connections and Weighted scale linearly O(N) in worst-case scanning, but are optimized with internal heaps/trees in production where applicable.
 
-<center><img src="./assets/benchmark_results.png" alt="Benchmark Results" /></center>
+<center><img src="./benchmark_results.png" alt="Benchmark Results" /></center>
 
 ### Capacity & Scaling
 - **Backend Limit**: Optimized for thousands of backends with minimal memory overhead.
