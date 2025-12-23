@@ -20,12 +20,17 @@ import (
 	"LoadBalancer/pkg/discovery/docker"
 	"LoadBalancer/pkg/discovery/kubernetes"
 
+	"flag"
+
 	"go.uber.org/zap"
 )
 
 func main() {
+	configFile := flag.String("config", "config/config.yaml", "Path to configuration file")
+	flag.Parse()
+
 	//Load configuration file
-	cfg, err := config.Load("config.yaml")
+	cfg, err := config.Load(*configFile)
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
