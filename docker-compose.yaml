@@ -9,8 +9,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    user: "root"
     volumes:
-      - ./config.yaml:/app/config.yaml:ro
+      - ./config/config.yaml:/app/config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     command: ["--config", "/app/config.yaml"]
     depends_on:
       - backend1
@@ -20,6 +22,8 @@ services:
   backend1:
     image: nginx:alpine
     container_name: backend1
+    labels:
+      - "lb.enable=true"
     ports:
       - "8081:80"
     restart: unless-stopped
@@ -27,6 +31,8 @@ services:
   backend2:
     image: nginx:alpine
     container_name: backend2
+    labels:
+      - "lb.enable=true"
     ports:
       - "8082:80"
     restart: unless-stopped

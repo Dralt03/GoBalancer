@@ -1,7 +1,7 @@
-listen_addr: ":8080"
+listen_address: ":8080"
 use_iouring: true
 
-balancing_mode: "least_conn"  #round_robin, least_conn, weighted, ip_hash
+algorithm: "least_connections"  #round_robin, least_connections, weighted, ip_hash
 
 backends:
   - address: "10.0.0.4:3000"
@@ -20,9 +20,8 @@ timeout:
   connect_timeout: 3
 
 discovery:
-  type: "static" # Options: static, docker, kubernetes
-  # docker:
-  #   # docker config
+  type: "docker" # Options: static, docker, kubernetes
+  docker: {}
   # kubernetes:
   #   namespace: "default"
   #   service: "my-service"
