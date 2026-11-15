@@ -29,7 +29,7 @@ func pipe(ctx context.Context, a, b net.Conn) {
 
 	go func() {
 		defer wg.Done()
-		_, err := io.Copy(b, a)
+		_, err := io.Copy(struct{io.Writer}{b}, struct{io.Reader}{a})
 		if err != nil {
 			b.Close()
 		}
@@ -38,7 +38,7 @@ func pipe(ctx context.Context, a, b net.Conn) {
 
 	go func() {
 		defer wg.Done()
-		_, err := io.Copy(a, b)
+		_, err := io.Copy(struct{io.Writer}{a}, struct{io.Reader}{b})
 		if err != nil {
 			a.Close()
 		}
